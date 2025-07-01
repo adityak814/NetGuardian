@@ -6,7 +6,7 @@ import requests
 import re
 
 st.set_page_config(page_title="SQLi & XSS Attack Detection", layout="wide")
-st.title("🔍 SQLi & XSS Attack Detection Dashboard")
+st.title("🔍 Web Attack Detection Dashboard")
 
 # ── 1) Load & label the CSIC dataset ──
 df = pd.read_csv("csic_database.csv")
