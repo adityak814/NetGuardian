@@ -20,7 +20,7 @@ df["text"] = (
 )
 
 
-# Global TF-IDF vectorizer (fit once on full dataset text)
+# Global TF-IDF vectorizer
 vectorizer = TfidfVectorizer(max_features=10000)
 vectorizer.fit(df["text"])
 

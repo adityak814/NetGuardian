@@ -1,4 +1,3 @@
-# dashboard.py
 import streamlit as st
 import pandas as pd
 import random
@@ -8,7 +7,7 @@ import re
 st.set_page_config(page_title="SQLi & XSS Attack Detection", layout="wide")
 st.title("🔍 Web Attack Detection Dashboard")
 
-# ── 1) Load & label the CSIC dataset ──
+# Load & label the dataset
 df = pd.read_csv("csic_database.csv")
 df["text"] = (
     df["Method"].fillna("") + " " +
@@ -59,7 +58,7 @@ df["attack_type"] = df.apply(
     axis=1
 )
 
-# ── 2) Sampling helper (up to n real samples) ──
+# Random Sampling
 def sample_rows(mask, label, n=5):
     subset = df[mask]
     k = min(len(subset), n)
@@ -77,13 +76,13 @@ def sample_rows(mask, label, n=5):
         })
     return out
 
-# ── 3) Build 5 samples per category ──
+
 benign = sample_rows(df.classification == 0, "Benign", n=5)
 sqli   = sample_rows(df.attack_type    == 1, "SQLi",   n=5)
 xss    = sample_rows(df.attack_type    == 2, "XSS",    n=5)
 other  = sample_rows(df.attack_type    == 3, "Other",  n=5)
 
-# ── 4) Sidebar: availability & four buttons ──
+
 st.sidebar.markdown("### Available Samples")
 st.sidebar.write(f"- Benign: {len(benign)}/5")
 st.sidebar.write(f"- SQLi:   {len(sqli)}/5")
@@ -96,7 +95,7 @@ btn_s = st.sidebar.button("🎲 Random SQLi Sample")
 btn_x = st.sidebar.button("🎲 Random XSS Sample")
 btn_o = st.sidebar.button("🎲 Random Other Attack Samples")
 
-# pick the right list
+
 if btn_b:
     chosen = benign
 elif btn_s:
@@ -125,7 +124,7 @@ if chosen:
 
     PROXY = "http://localhost:5000"
 
-    # — Anomaly Detection —
+    # Anomaly Detection
     try:
         r = requests.post(f"{PROXY}/predict_anomaly", json=payload); r.raise_for_status()
         score = r.json()['anomaly_score']
@@ -140,7 +139,7 @@ if chosen:
     except Exception as e:
         st.error(f"Anomaly detection error: {e}")
 
-    # — Binary Classification —
+    # Binary Classification
     try:
         r = requests.post(f"{PROXY}/predict_binary", json=payload); r.raise_for_status()
         lbl = r.json()['label']
@@ -153,7 +152,7 @@ if chosen:
     except Exception as e:
         st.error(f"Binary classification error: {e}")
 
-    # — Multi-Class Classification —
+    # Multi-Class Classification
     try:
         r = requests.post(f"{PROXY}/predict_multiclass", json=payload); r.raise_for_status()
         m_lbl = r.json()['label']

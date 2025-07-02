@@ -82,7 +82,7 @@ for col in ["Method", "URL", "content", "User-Agent"]:
 
 # Extract Numerical Features and Assign Labels
 
-# Prepare storage for features and labels
+
 feature_list = []
 attack_labels = []
 
@@ -131,7 +131,6 @@ for idx, row in df.iterrows():
     else:
         feats["entropy"] = 0
 
-    # Append features
     feature_list.append(feats)
 
     # Attack type labeling
@@ -170,6 +169,7 @@ for idx, row in df.iterrows():
 
 
 # Vectorize Text and Combine with Numerical Features
+
 # Vectorizers
 tfidf_char = TfidfVectorizer(analyzer="char_wb", ngram_range=(2,4), max_features=5000, min_df=2, max_df=0.95)
 tfidf_word = TfidfVectorizer(analyzer="word", ngram_range=(1,2), max_features=3000, min_df=2, max_df=0.95)
@@ -187,23 +187,6 @@ y = np.array(attack_labels)
 
 # Train-Test Split for Multiclass Classification (Normal vs SQLi vs XSS vs Others)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
-# Define and Train Model
-# multiClass_models = {
-#     "XGBoost": xgb.XGBClassifier(n_estimators=200, max_depth=6, learning_rate=0.1, subsample=0.8, colsample_bytree=0.8, random_state=42, eval_metric="mlogloss"),
-#     "LightGBM": lgb.LGBMClassifier(n_estimators=200, max_depth=6, learning_rate=0.1, subsample=0.8, colsample_bytree=0.8, random_state=42, verbose=-1),
-#     "Random Forest": RandomForestClassifier(n_estimators=200, max_depth=10, min_samples_split=5, min_samples_leaf=2, random_state=42, n_jobs=-1),
-#     "Logistic Regression": LogisticRegression(max_iter=2000, C=1.0, random_state=42, n_jobs=-1),
-# }
-#
-# results = {}
-# for name, model in multiClass_models.items():
-#     model.fit(X_train, y_train)
-#     y_pred = model.predict(X_test)
-#     acc = accuracy_score(y_test, y_pred)
-#     f1 = f1_score(y_test, y_pred, average="weighted")
-#     results[name] = {"accuracy": acc, "f1": f1, "y_pred": y_pred}
-#     print(f"{name}: Accuracy={acc:.4f}, Weighted F1={f1:.4f}")
 
 lgb_model = lgb.LGBMClassifier(
     n_estimators=200,

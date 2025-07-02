@@ -8,7 +8,7 @@ from scipy.sparse import hstack
 
 app = Flask(__name__)
 
-# ———  Load binary/anomaly artifacts  ———
+# Load Models
 with open('vectorizers/vectorizer.pkl','rb') as f:
     bin_vectorizer = pickle.load(f)
 with open('models/classifier.pkl','rb') as f:
@@ -16,7 +16,6 @@ with open('models/classifier.pkl','rb') as f:
 with open('models/anomaly_detector.pkl','rb') as f:
     ocsvm = pickle.load(f)
 
-# ———  Load multiclass artifacts  ———
 with open('vectorizers/tfidf_char.pkl','rb') as f:
     tfidf_char = pickle.load(f)
 with open('vectorizers/tfidf_word.pkl','rb') as f:
@@ -28,7 +27,7 @@ with open('vectorizers/scaler.pkl','rb') as f:
 with open('models/lightgbm_model.pkl','rb') as f:
     multi_clf = pickle.load(f)
 
-#  SQLi / XSS regex lists (copy from multiclass_attack_classifier.py)
+#  SQLi / XSS regex lists
 sqli_patterns = [
     r"(?i)(\bUNION\b.*\bSELECT\b|\bSELECT\b.*\bUNION\b)",
     r"(?i)(1\s*=\s*1|0\s*=\s*0|\btrue\b|\bfalse\b)",
@@ -61,7 +60,7 @@ xss_patterns = [
 ]
 
 def preprocess_text(text):
-    """exactly as in multiclass_attack_classifier.py"""
+
     if not text: return ""
     s = text
     for _ in range(3):
@@ -79,7 +78,7 @@ def preprocess_text(text):
     return ' '.join(s.split()).lower()
 
 def extract_numeric_features(method, url, content, ua):
-    """Compute the same  numeric features used in multiclass_attack_classifier.py"""
+
     fields = [method, url, content, ua]
     combined = ' '.join(preprocess_text(f) for f in fields)
     feats = {}
@@ -144,14 +143,16 @@ def predict_anomaly():
 def predict_multiclass():
     data = request.get_json(force=True)
     m, u, c, ua = data['method'], data['url'], data['content'], data['user_agent']
-    # 1) text features
+    # text features
     tc = tfidf_char.transform([preprocess_text(f"{m} {u} {c} {ua}")])
     tw = tfidf_word.transform([preprocess_text(f"{m} {u} {c} {ua}")])
     ct = count_vec.transform([preprocess_text(f"{m} {u} {c} {ua}")])
-    # 2) numeric features
+
+    # numeric features
     num = extract_numeric_features(m,u,c,ua).reshape(1,-1)
     num_s = scaler.transform(num)
-    # 3) combine
+
+    # combine
     Xmc = hstack([tc, tw, ct, num_s])
     lbl = int(multi_clf.predict(Xmc)[0])
     return jsonify({'label': lbl})
