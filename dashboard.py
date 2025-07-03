@@ -122,7 +122,7 @@ if chosen:
         "user_agent": s['ua']
     }
 
-    PROXY = "http://localhost:5000"
+    PROXY = st.secrets["URL"]
 
     # Anomaly Detection
     try:
